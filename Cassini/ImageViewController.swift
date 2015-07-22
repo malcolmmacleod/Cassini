@@ -1,0 +1,74 @@
+//
+//  ImageViewController.swift
+//  Cassini
+//
+//  Created by Malcolm Macleod on 22/07/2015.
+//  Copyright (c) 2015 Malcolm Macleod. All rights reserved.
+//
+
+import UIKit
+
+class ImageViewController: UIViewController, UIScrollViewDelegate {
+
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var scrollView: UIScrollView! {
+        didSet {
+            scrollView.contentSize = imageView.frame.size
+            scrollView.delegate = self
+            scrollView.minimumZoomScale = 0.03
+            scrollView.maximumZoomScale = 1.0
+        }
+    }
+    
+    var imageURL : NSURL? {
+        didSet {
+            image = nil
+            if (view.window != nil) {  // check if we are on screen
+                fetchImage()
+            }
+        }
+    }
+    
+    
+
+    private var image : UIImage? {
+        get { return imageView.image }
+        set {
+            imageView.image = newValue
+            imageView.sizeToFit()
+            scrollView.contentSize = imageView.frame.size
+        }
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        scrollView.addSubview(imageView)
+        
+        if image == nil {
+            imageURL = DemoURL.NASA.Cassini
+        }
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if image == nil {
+            fetchImage()
+        }
+    }
+    
+    private func fetchImage() {
+        if let url = imageURL {
+            let imageData = NSData(contentsOfURL: url)
+            if imageData != nil {
+                self.image = UIImage(data: imageData!)
+            } else {
+                image = nil
+            }
+        }
+    }
+    
+    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+        return imageView
+    }
+}
